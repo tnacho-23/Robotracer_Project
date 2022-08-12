@@ -1,5 +1,7 @@
-//Definición de componentes y sus pines
+//Librerías
+#include <QTRSensors.h>
 
+//Definición de componentes y sus pines
 int Buzzer = 2;
 int AIN1 = 3; //A: Motor Izquierdo
 int AIN2 = 4;
@@ -18,9 +20,28 @@ int QTR6 = A5; //Sensor Frontal Extremo Derecho
 int TCR1 = A6; //Sensor lateral Izquierdo
 int TCR2 = A7; //Sensor lateral Derecho
 
+QTRSensors qtr;
+const uint8_t SensorCount = 6;
+uint16_t sensorValues[SensorCount];
 
 //Setup
 void setup() {
+  Serial.begin(9600);
+
+  //Sensors Config
+  qtr.setTypeAnalog();
+  qtr.setSensorPins((const uint8_t[]){A0, A1, A2, A3, A4, A5}, SensorCount);
+  qtr.setEmitterPin(StandBy);
+  delay(500);
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, HIGH); 
+  for (uint16_t i = 0; i < 400; i++)
+  {
+    qtr.calibrate();
+  }
+  digitalWrite(LED_BUILTIN, LOW); // turn off Arduino's LED to indicate we are through with calibration
+
+  //Pin Setup
   pinMode(Buzzer, OUTPUT);
   pinMode(AIN1, OUTPUT);
   pinMode(AIN2,OUTPUT);
@@ -39,24 +60,19 @@ void setup() {
   pinMode(TCR1,INPUT);
   pinMode(TCR2,INPUT);
   digitalWrite(StandBy,HIGH);
-  Serial.begin(9600);
+ 
+
+  //Motores Apagados
+  motor_der("apagado",0);
+  motor_izq("apagado",0);
 }
 
 //Main Loop
 void loop() {
-  motor_der("atrás", 100);
-  delay(3000);
-  motor_der("atrás", 255);
-  delay(1000);
-  motor_der("atrás",100);
-  delay(1000);
-  motor_der("adelante",100);
-  delay(500);
-  motor_der("adelante",255);
-  delay(3000);
-  motor_der("apagado",0);
-  delay(2000);
-  
+uint16_t position = qtr.readLineBlack(sensorValues); //Se puede cambiar a línea blanca con readLineWhite()
+Serial.print(position);
+Serial.print('\t');
+delay(250);
 
 }
 
