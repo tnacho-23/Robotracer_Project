@@ -69,11 +69,19 @@ void setup() {
 
 //Main Loop
 void loop() {
-uint16_t position = qtr.readLineBlack(sensorValues); //Se puede cambiar a línea blanca con readLineWhite()
-Serial.print(position);
-Serial.print('\t');
-delay(250);
-
+  uint16_t position = qtr.readLineBlack(sensorValues); //Se puede cambiar a línea blanca con readLineWhite()
+  if(position < 2200){
+    motor_der("adelante", 150);
+    motor_izq("adelante", 50);
+  }
+  if(position > 2700){
+    motor_der("adelante",50);
+    motor_izq("adelante",150);
+  }
+  if(position>=2200 and position<= 2700){
+    motor_der("adelante",255);
+    motor_izq("adelante",255);
+  }
 }
 
 //Funciones Auxiliares
