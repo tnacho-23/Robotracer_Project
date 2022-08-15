@@ -10,7 +10,7 @@ int PWMB =6; //Velocidad B
 int BIN1 = 7; //B: Motor Derecho
 int BIN2 = 8;
 int StandBy = 9; //HIGH para QTR y Driver motor
-int Button = 10; //Botón multifunción
+int Btn = 10; //Botón multifunción
 int QTR1 = A0; // Sensor Frontal Extremo Izquierdo
 int QTR2 = A1;
 int QTR3 = A2;
@@ -20,28 +20,38 @@ int QTR6 = A5; //Sensor Frontal Extremo Derecho
 int TCR1 = A6; //Sensor lateral Izquierdo
 int TCR2 = A7; //Sensor lateral Derecho
 
+//Variables Buzzer
+int pBuzzer = 2;
+int entero = 1000/2;
+int medio = 1000/4;
+int tercio = 1000/6;
+int cuarto = 1000/8;
+int octavo = 1000/16;
+double pausa = 1.30;
+
+int Do = 262;
+int Re = 294;
+int Mi = 330;
+int Fa = 349;
+int Sol = 392;
+int La = 440;
+int Si = 493;
+int Do1 = 523;
+int Re1 = 587;
+int Mi1 = 659;
+int Fa1 = 699;
+int Sol1 = 784;
+
 QTRSensors qtr;
 const uint8_t SensorCount = 6;
 uint16_t sensorValues[SensorCount];
+
 
 //Setup
 void setup() {
   Serial.begin(9600);
 
-  //Sensors Config
-  qtr.setTypeAnalog();
-  qtr.setSensorPins((const uint8_t[]){A0, A1, A2, A3, A4, A5}, SensorCount);
-  qtr.setEmitterPin(StandBy);
-  delay(500);
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, HIGH); 
-  for (uint16_t i = 0; i < 400; i++)
-  {
-    qtr.calibrate();
-  }
-  digitalWrite(LED_BUILTIN, LOW); // turn off Arduino's LED to indicate we are through with calibration
-
-  //Pin Setup
+    //Pin Setup
   pinMode(Buzzer, OUTPUT);
   pinMode(AIN1, OUTPUT);
   pinMode(AIN2,OUTPUT);
@@ -50,7 +60,7 @@ void setup() {
   pinMode(BIN1,OUTPUT);
   pinMode(BIN2,OUTPUT);
   pinMode(StandBy,OUTPUT);
-  pinMode(Button,INPUT);
+  pinMode(Btn,INPUT);
   pinMode(QTR1,INPUT);
   pinMode(QTR2,INPUT);
   pinMode(QTR3,INPUT);
@@ -60,8 +70,29 @@ void setup() {
   pinMode(TCR1,INPUT);
   pinMode(TCR2,INPUT);
   digitalWrite(StandBy,HIGH);
- 
 
+  //Buzzer Start
+
+  //Sensors Config
+  qtr.setTypeAnalog();
+  qtr.setSensorPins((const uint8_t[]){A0, A1, A2, A3, A4, A5}, SensorCount);
+  qtr.setEmitterPin(StandBy);
+  delay(500);
+  pinMode(LED_BUILTIN, OUTPUT);
+  tone(Buzzer, Sol, cuarto);
+  delay(cuarto*pausa);
+  digitalWrite(LED_BUILTIN, HIGH);
+   
+  for (uint16_t i = 0; i < 400; i++)
+  {
+    qtr.calibrate();
+  }
+  digitalWrite(LED_BUILTIN, LOW); // turn off Arduino's LED to indicate we are through with calibration
+  tone(Buzzer, Sol, cuarto);
+  delay(cuarto*pausa);
+  tone(Buzzer, Sol, cuarto);
+  delay(cuarto*pausa);
+  
   //Motores Apagados
   motor_der("apagado",0);
   motor_izq("apagado",0);
