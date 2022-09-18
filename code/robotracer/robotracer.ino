@@ -47,6 +47,13 @@ const uint8_t SensorCount = 6;
 uint16_t sensorValues[SensorCount];
 
 
+//Constantes PID
+float kp = 0.045;
+float kd = 0.03;
+float ki = 0.0065;
+float vel =100;
+
+
 //Setup
 void setup() {
   Serial.begin(9600);
@@ -99,19 +106,29 @@ void setup() {
 }
 
 //Main Loop
-void loop() {
-  uint16_t position = qtr.readLineBlack(sensorValues); //Se puede cambiar a línea blanca con readLineWhite()
-  if(position < 2200){
-    motor_der("adelante", 150);
-    motor_izq("adelante", 50);
-  }
-  if(position > 2700){
-    motor_der("adelante",50);
-    motor_izq("adelante",150);
-  }
-  if(position>=2200 and position<= 2700){
-    motor_der("adelante",255);
-    motor_izq("adelante",255);
+void loop(){
+  //if(position < 2200){
+    //motor_der("adelante", 150);
+    //motor_izq("adelante", 50);
+  //}
+  //if(position > 2700){
+    //motor_der("adelante",50);
+    //motor_izq("adelante",150);
+  //}
+  //if(position>=2200 and position<= 2700){
+    //motor_der("adelante",255);
+    //motor_izq("adelante",255);
+  //}
+  float E = 0;
+  float E_ant = 0;
+  if (digitalRead(Btn) == HIGH){
+    while(HIGH){
+      uint16_t pos = qtr.readLineBlack(sensorValues); //Se puede cambiar a línea blanca con readLineWhite()
+      float E = pos - 2500;
+      motor_der("adelante",vel-PID(E, E_ant));
+      motor_izq("adelante",vel+PID(E,E_ant));
+      float E_ant = E;
+    }   
   }
 }
 
@@ -151,4 +168,10 @@ void motor_der(String movimiento, int velocidad){
     digitalWrite(BIN2, LOW);
     analogWrite(PWMB,0);
   }
+}
+
+
+//PID = kp*e + kd*(e-ea) + ki*(e-ea)
+int PID(int E,int E_ant){
+  return kp*E+kd*(E-E_ant)+ki*(E-E_ant);
 }
