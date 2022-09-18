@@ -128,7 +128,7 @@ void motor_izq(String movimiento, int velocidad){
     digitalWrite(AIN2,HIGH);
     analogWrite(PWMA,velocidad);
   }
-  if(movimiento == "atrás"){
+  if(movimiento == "atras"){
     digitalWrite(AIN1,HIGH);
     digitalWrite(AIN2, LOW);
     analogWrite(PWMA,velocidad);
