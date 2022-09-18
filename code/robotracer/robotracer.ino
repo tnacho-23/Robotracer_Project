@@ -107,18 +107,6 @@ void setup() {
 
 //Main Loop
 void loop(){
-  //if(position < 2200){
-    //motor_der("adelante", 150);
-    //motor_izq("adelante", 50);
-  //}
-  //if(position > 2700){
-    //motor_der("adelante",50);
-    //motor_izq("adelante",150);
-  //}
-  //if(position>=2200 and position<= 2700){
-    //motor_der("adelante",255);
-    //motor_izq("adelante",255);
-  //}
   float E = 0;
   float E_ant = 0;
   if (digitalRead(Btn) == HIGH){
