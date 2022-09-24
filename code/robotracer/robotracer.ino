@@ -48,10 +48,10 @@ uint16_t sensorValues[SensorCount];
 
 
 //Constantes PID
-float kp = 0.045;
-float kd = 0.03;
-float ki = 0.0065;
-float vel =100;
+double kp = 0.045;
+double kd = 0.03;
+double ki = 0.065;
+double vel =100;
 
 
 //Setup
@@ -82,7 +82,7 @@ void setup() {
 
   //Sensors Config
   qtr.setTypeAnalog();
-  qtr.setSensorPins((const uint8_t[]){A0, A1, A2, A3, A4, A5}, SensorCount);
+  qtr.setSensorPins((const uint8_t[]){A1, A2, A3, A4, A5, A6}, SensorCount);
   qtr.setEmitterPin(StandBy);
   delay(500);
   pinMode(LED_BUILTIN, OUTPUT);
@@ -109,12 +109,14 @@ void setup() {
 void loop(){
   float E = 0;
   float E_ant = 0;
+  float E_2ant = 0;
   if (digitalRead(Btn) == HIGH){
     while(HIGH){
       uint16_t pos = qtr.readLineBlack(sensorValues); //Se puede cambiar a línea blanca con readLineWhite()
       float E = pos - 2500;
-      motor_der("adelante",vel-PID(E, E_ant));
-      motor_izq("adelante",vel+PID(E,E_ant));
+      motor_der("adelante",vel-PID(E, E_ant,E_2ant));
+      motor_izq("adelante",vel+PID(E,E_ant,E_2ant));
+      float E_2ant = E_ant;
       float E_ant = E;
     }   
   }
@@ -159,7 +161,7 @@ void motor_der(String movimiento, int velocidad){
 }
 
 
-//PID = kp*e + kd*(e-ea) + ki*(e-ea)
-int PID(int E,int E_ant){
-  return kp*E+kd*(E-E_ant)+ki*(E-E_ant);
+//PID = kp*e + kd*(e-ea) + ki*(e-e2a)
+int PID(int E,int E_ant,int E_2ant){
+  return kp*E+kd*(E-E_ant)+ki*(E-E_2ant);
 }
