@@ -11,17 +11,16 @@ int BIN1 = 7; //B: Motor Derecho
 int BIN2 = 8;
 int StandBy = 9; //HIGH para QTR y Driver motor
 int Btn = 10; //Botón multifunción
-int QTR1 = A0; // Sensor Frontal Extremo Izquierdo
-int QTR2 = A1;
-int QTR3 = A2;
-int QTR4 = A3;
-int QTR5 = A4;
-int QTR6 = A5; //Sensor Frontal Extremo Derecho
 int TCR1 = 11; //Sensor lateral Izquierdo
 int TCR2 = 12; //Sensor lateral Derecho
 
+//Variables sensores laterales
+int geo = 0;
+int lgeo = 0;
+int end_line = 0; //variable que indica stop
+
+
 //Variables Buzzer
-int pBuzzer = 2;
 int entero = 1000/2;
 int medio = 1000/4;
 int tercio = 1000/6;
@@ -48,10 +47,14 @@ uint16_t sensorValues[SensorCount];
 
 
 //Constantes PID
-double kp = 0.045;
-double kd = 0.03;
-double ki = 0.065;
-double vel =100;
+float E = 0;
+float E_ant = 0;
+float E_2ant = 0;
+float kp = 0.045;
+float kd = 0.03;
+float ki = 0.065;
+float vel =100;
+
 
 
 //Setup
@@ -68,12 +71,6 @@ void setup() {
   pinMode(BIN2,OUTPUT);
   pinMode(StandBy,OUTPUT);
   pinMode(Btn,INPUT);
-  pinMode(QTR1,INPUT);
-  pinMode(QTR2,INPUT);
-  pinMode(QTR3,INPUT);
-  pinMode(QTR4,INPUT);
-  pinMode(QTR5,INPUT);
-  pinMode(QTR6,INPUT);
   pinMode(TCR1,INPUT);
   pinMode(TCR2,INPUT);
   digitalWrite(StandBy,HIGH);
@@ -82,11 +79,11 @@ void setup() {
 
   //Sensors Config
   qtr.setTypeAnalog();
-  qtr.setSensorPins((const uint8_t[]){A1, A2, A3, A4, A5}, SensorCount);
+  qtr.setSensorPins((const uint8_t[]){A1, A2, A3, A4, A5, A6}, SensorCount);
   qtr.setEmitterPin(StandBy);
   delay(500);
   pinMode(LED_BUILTIN, OUTPUT);
-  tone(Buzzer, Sol1, cuarto);
+  tone(Buzzer, Do1, cuarto);
   delay(cuarto*pausa);
   digitalWrite(LED_BUILTIN, HIGH);
    
@@ -95,9 +92,9 @@ void setup() {
     qtr.calibrate();
   }
   digitalWrite(LED_BUILTIN, LOW); // turn off Arduino's LED to indicate we are through with calibration
-  tone(Buzzer, Sol1, cuarto);
+  tone(Buzzer, Do1, cuarto);
   delay(cuarto*pausa);
-  tone(Buzzer, Sol1, cuarto);
+  tone(Buzzer, Do1, cuarto);
   delay(cuarto*pausa);
   
   //Motores Apagados
@@ -107,21 +104,25 @@ void setup() {
 
 //Main Loop
 void loop(){
-  float E = 0;
-  float E_ant = 0;
-  float E_2ant = 0;
+  int start = LOW;
   if (digitalRead(Btn) == HIGH){
-    while(HIGH){
+    delay(2000);
+    start = HIGH;
+    while(start){
       uint16_t pos = qtr.readLineBlack(sensorValues); //Se puede cambiar a línea blanca con readLineWhite()
       float E = pos - 2500;
       motor_der("adelante",vel-PID(E, E_ant,E_2ant));
       motor_izq("adelante",vel+PID(E,E_ant,E_2ant));
-      float E_2ant = E_ant;
-      float E_ant = E;
-      if (digitalRead(TCR1) == LOW or digitalRead(TCR2) == LOW){
-        tone(Buzzer, Sol1, cuarto);
+      E_2ant = E_ant;
+      E_ant = E;
+      hito();
+      if (end_line >=2){
+        start = LOW;
+        motor_der("apagado",0);
+        motor_izq("apagado",0);
       }
-    }   
+    }
+       
   }
 }
 
@@ -167,4 +168,53 @@ void motor_der(String movimiento, int velocidad){
 //PID = kp*e + kd*(e-ea) + ki*(e-e2a)
 int PID(int E,int E_ant,int E_2ant){
   return kp*E+kd*(E-E_ant)+ki*(E-E_2ant);
+}
+
+//Hitos laterales
+//geo = 0: sin hitos
+// geo = 1: hito solo a la izquierda
+// geo = 2: hito solo a la derecha
+// geo = 3: hito a la izquierda y derecha
+// Los sensores entregan LOW sobre negro y HIGH sobre blanco
+void hito(){
+  int HIZ = digitalRead(TCR1);
+  int HDE = digitalRead(TCR2);
+  //Serial.print(HIZ);
+  if (HIZ == HIGH and HDE == HIGH){ //NO HAY HITOS
+     geo = 0;
+  }
+  else if (HIZ == LOW and HDE == HIGH){ //HITO IZQUIERDO
+    geo = 1;
+  }
+  else if (HIZ == HIGH and HDE == LOW){ //HITO DERECHO
+    geo = 2;
+  }
+  else if (HIZ == LOW and HDE == LOW){ //HITO AMBOS LADOS
+    geo = 3;
+  }
+  if (geo != lgeo){
+    if (geo == 1 and lgeo == 0){ //HITO IZQUIERDO
+      Lhito();
+    }
+    else if (geo == 2 and lgeo == 0){ //HITO DERECHO
+      Rhito();
+    }
+    else if (geo == 3 and lgeo == 0){ //HITO AMBOS LADOS
+      Cruce();
+    }
+  }
+  lgeo = geo;
+}
+
+void Lhito(){
+  tone(Buzzer, Do1, cuarto);
+}
+
+void Rhito(){
+  tone(Buzzer, Do1, cuarto);
+  end_line = end_line + 1;
+}
+
+void Cruce(){
+  tone(Buzzer, Do1, cuarto);
 }
