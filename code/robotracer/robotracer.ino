@@ -17,8 +17,8 @@ int QTR3 = A2;
 int QTR4 = A3;
 int QTR5 = A4;
 int QTR6 = A5; //Sensor Frontal Extremo Derecho
-int TCR1 = A6; //Sensor lateral Izquierdo
-int TCR2 = A7; //Sensor lateral Derecho
+int TCR1 = 11; //Sensor lateral Izquierdo
+int TCR2 = 12; //Sensor lateral Derecho
 
 //Variables Buzzer
 int pBuzzer = 2;
@@ -82,11 +82,11 @@ void setup() {
 
   //Sensors Config
   qtr.setTypeAnalog();
-  qtr.setSensorPins((const uint8_t[]){A1, A2, A3, A4, A5, A6}, SensorCount);
+  qtr.setSensorPins((const uint8_t[]){A1, A2, A3, A4, A5}, SensorCount);
   qtr.setEmitterPin(StandBy);
   delay(500);
   pinMode(LED_BUILTIN, OUTPUT);
-  tone(Buzzer, Sol, cuarto);
+  tone(Buzzer, Sol1, cuarto);
   delay(cuarto*pausa);
   digitalWrite(LED_BUILTIN, HIGH);
    
@@ -95,9 +95,9 @@ void setup() {
     qtr.calibrate();
   }
   digitalWrite(LED_BUILTIN, LOW); // turn off Arduino's LED to indicate we are through with calibration
-  tone(Buzzer, Sol, cuarto);
+  tone(Buzzer, Sol1, cuarto);
   delay(cuarto*pausa);
-  tone(Buzzer, Sol, cuarto);
+  tone(Buzzer, Sol1, cuarto);
   delay(cuarto*pausa);
   
   //Motores Apagados
@@ -118,6 +118,9 @@ void loop(){
       motor_izq("adelante",vel+PID(E,E_ant,E_2ant));
       float E_2ant = E_ant;
       float E_ant = E;
+      if (digitalRead(TCR1) == LOW or digitalRead(TCR2) == LOW){
+        tone(Buzzer, Sol1, cuarto);
+      }
     }   
   }
 }
