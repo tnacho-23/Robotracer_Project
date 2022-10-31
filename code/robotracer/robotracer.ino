@@ -42,7 +42,7 @@ int Fa1 = 699;
 int Sol1 = 784;
 
 QTRSensors qtr;
-const uint8_t SensorCount = 6;
+const uint8_t SensorCount = 8;
 uint16_t sensorValues[SensorCount];
 
 
@@ -53,7 +53,9 @@ float E_2ant = 0;
 float kp = 0.08;
 float kd = 0.05;
 float ki = 0.05;
-float vel =150;
+float vel =100;
+float vel_der = vel;
+float vel_izq = vel;
 
 
 
@@ -79,7 +81,7 @@ void setup() {
 
   //Sensors Config
   qtr.setTypeAnalog();
-  qtr.setSensorPins((const uint8_t[]){A1, A2, A3, A4, A5, A6}, SensorCount);
+  qtr.setSensorPins((const uint8_t[]){A0,A1, A2, A3, A4, A5, A6,A7}, SensorCount);
   qtr.setEmitterPin(StandBy);
   delay(500);
   pinMode(LED_BUILTIN, OUTPUT);
@@ -106,13 +108,15 @@ void setup() {
 void loop(){
   int start = LOW;
   if (digitalRead(Btn) == HIGH){
-    delay(2000);
+    delay(1000);
     start = HIGH;
     while(start){
       uint16_t pos = qtr.readLineBlack(sensorValues); //Se puede cambiar a línea blanca con readLineWhite()
-      float E = pos - 2500;
-      motor_der("adelante",vel-PID(E, E_ant,E_2ant));
-      motor_izq("adelante",vel+PID(E,E_ant,E_2ant));
+      float E = pos - 3500;
+      vel_der = vel_der - PID(E, E_ant,E_2ant);
+      vel_izq = vel_izq + PID(E, E_ant,E_2ant);
+      motor_der("adelante",vel_der);
+      motor_izq("adelante",vel_izq);
       E_2ant = E_ant;
       E_ant = E;
       hito();
@@ -167,7 +171,7 @@ void motor_der(String movimiento, int velocidad){
 
 //PID = kp*e + kd*(e-ea) + ki*(e-e2a)
 int PID(int E,int E_ant,int E_2ant){
-  return kp*E+kd*(E-E_ant)+ki*(E-E_2ant);
+  return kp*E+kd*E_ant+ki*E_2ant;
 }
 
 //Hitos laterales
