@@ -50,10 +50,10 @@ uint16_t sensorValues[SensorCount];
 float E = 0;
 float E_ant = 0;
 float E_2ant = 0;
-float kp = 0.01;
-float kd = 3;
-float ki = 0;
-int vel =120;
+double kp = 0.11;
+double kd = 0.045;
+double ki = 0.075;
+double vel =130;
 
 
 
