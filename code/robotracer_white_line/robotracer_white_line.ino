@@ -50,7 +50,7 @@ uint16_t sensorValues[SensorCount];
 float E = 0;
 float E_ant = 0;
 float E_2ant = 0;
-double kp = 0.115;
+double kp = 0.105;
 double kd = 0.085;
 double ki = 0.045;
 double vel =120;
@@ -107,7 +107,11 @@ void setup() {
 void loop(){
   int start = LOW;
   if (digitalRead(Btn) == HIGH){
-    delay(1000);
+    tone(Buzzer, Do1, entero);
+    delay(entero*pausa);
+    tone(Buzzer, Do1, entero);
+    delay(entero*pausa);
+    tone(Buzzer, Sol1, 2*entero);
     start = true;
     while(start){
       uint16_t pos = qtr.readLineWhite(sensorValues); //Se puede cambiar a línea blanca con readLineWhite()
