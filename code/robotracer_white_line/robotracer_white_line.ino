@@ -220,7 +220,7 @@ void Lhito(){
 
 void Rhito(){
   tone(Buzzer, Do1, cuarto);
-  end_line = end_line + 1;
+   end_line = end_line + 1;
 }
 
 void Cruce(){
